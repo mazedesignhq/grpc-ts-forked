@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package users;
+
+service Users {
+  rpc GetUserById (GetUserByIdRequest) returns (UserResponse) {}
+  rpc CreateUser (CreateUserRequest) returns (UserResponse) {}
+  rpc GetUsersByTeamId (GetUsersByTeamIdRequest) returns (UsersResponse) {}
+  rpc UserCreated (google.protobuf.Empty) returns (stream UserResponse) {}
+  rpc EmitUserAction (stream EmitUserActionRequest) returns (EmitUserActionResponse) {}
+  rpc UpdateUser (stream UpdateUserRequest) returns (stream UserUpdatedResponse) {}
+}
+
+message GetUserByIdRequest {
+  string id = 1;
+}
+
+message GetUsersByTeamIdRequest {
+  string team_id = 1;
+}
+
+message UserInputData {
+  string name = 1;
+  string email = 2;
+  string team_id = 3;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string team_id = 4;
+}
+
+enum UserAction {
+  USER_ACTION_UNSPECIFIED = 0;
+  USER_ACTION_UPLOADED = 1;
+  USER_ACTION_DOWNLOADED = 2;
+}
+
+message EmitUserActionRequest {
+  string user_id = 1;
+  UserAction action = 2;
+}
+
+message EmitUserActionResponse {
+  uint32 events_processed = 1;
+  repeated EmitUserActionRequest events = 2;
+}
+
+message CreateUserRequest {
+  UserInputData user = 1;
+}
+
+message UpdateUserRequest {
+  string user_id = 1;
+  UserInputData user = 2;
+}
+
+message UserUpdatedResponse {
+  string user_id = 2;
+}
+
+message UserResponse {
+  User user = 1;
+}
+
+message UsersResponse {
+  repeated User users = 1;
+}

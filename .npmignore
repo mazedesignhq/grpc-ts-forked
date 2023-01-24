@@ -1,0 +1,13 @@
+.circleci/
+coverage/
+scripts/
+test/
+.eslintignore
+.eslintrc.json
+.gitignore
+.nvmrc
+.prettierrc
+jest.config.js
+jest.setup.js
+tsconfig.src.json
+tsconfig.cli.json

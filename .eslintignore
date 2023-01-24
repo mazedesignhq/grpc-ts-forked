@@ -1,0 +1,8 @@
+cli
+!src/cli
+!test/cli
+coverage
+dist
+examples/generated
+test/generated
+test/cli/generated

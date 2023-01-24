@@ -1,0 +1,8 @@
+node_modules
+cli
+!src/cli
+!test/cli
+coverage
+dist
+test/generated
+test/cli/generated

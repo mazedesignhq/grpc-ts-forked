@@ -9,6 +9,9 @@
     "promises",
     "async"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "homepage": "https://github.com/lewnelson/grpc-ts#readme",
   "bugs": {
     "url": "https://github.com/lewnelson/grpc-ts/issues"

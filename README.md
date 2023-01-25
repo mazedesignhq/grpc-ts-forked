@@ -2,6 +2,20 @@
 
 This library is an abstraction on [@grpc/grpc-js](https://github.com/grpc/grpc-node/tree/master) to provide a simpler interface for making requests from a gRPC client and generating fully typed gRPC clients from `.proto` files.
 
+Go from this:
+
+```typescript
+client.getName(new GetNameRequest(), (error: Error | null, response: GetNameResponse | undefined) => {
+  // handle response in callback
+});
+```
+
+to this:
+
+```typescript
+const response = await client.unaryRequest("getName", new GetNameRequest());
+```
+
 ## Install
 
 ```bash

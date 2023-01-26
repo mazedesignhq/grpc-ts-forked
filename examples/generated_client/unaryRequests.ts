@@ -1,10 +1,9 @@
-import { createClient } from "@lewnelson/grpc-ts";
 import { Metadata, ServiceError } from "@grpc/grpc-js";
-import { ExampleClient } from "./generated/example/example_grpc_pb";
-import { GetNameRequest } from "./generated/example/example_pb";
+import { ExampleClient } from "../generated/example";
+import { GetNameRequest } from "../generated/example/example_pb";
 
 // Creates client with insecure credentials
-const client = createClient(ExampleClient, "localhost:50051");
+const client = new ExampleClient("localhost:50051");
 
 // Making a basic request
 (async () => {
@@ -14,7 +13,7 @@ const client = createClient(ExampleClient, "localhost:50051");
 
   try {
     // Make the request
-    const response = await client.unaryRequest("getName", request);
+    const response = await client.getName(request);
     // Do something with the response
     response.getName();
   } catch (error) {
@@ -35,7 +34,7 @@ const client = createClient(ExampleClient, "localhost:50051");
 
   try {
     // Make the request
-    const response = await client.unaryRequest("getName", request, {
+    const response = await client.getName(request, {
       metadata: new Metadata({ cacheableRequest: true }),
       options: {
         // Specify a deadline on the request 10 seconds from now

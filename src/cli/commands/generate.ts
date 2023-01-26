@@ -2,7 +2,8 @@ import { Command } from "commander";
 import mkdirp from "mkdirp";
 import execa from "execa";
 import { basename, extname, join, resolve } from "path";
-import { stat, readdir, getRootDirectory } from "../utils";
+import { stat, readdir, getRootDirectory, writeFile } from "../utils";
+import { generateClientDeclarationAndJavaScript } from "../lib/clientGenerator";
 
 type GenerateOptions = {
   input: string;
@@ -71,6 +72,19 @@ const getInputFiles = async ({
   }
 };
 
+const getClientOutputDirectory = (
+  destination: string,
+  inputFile: InputFile
+): string => {
+  const currentDirectory = process.cwd();
+  return resolve(
+    currentDirectory,
+    destination,
+    inputFile.relativePath,
+    basename(inputFile.filename, ".proto")
+  );
+};
+
 const generateForFile = async ({
   inputFile,
   destination,
@@ -80,14 +94,7 @@ const generateForFile = async ({
   destination: string;
   rootDirectory: string;
 }): Promise<void> => {
-  const currentDirectory = process.cwd();
-  const outDirectory = resolve(
-    currentDirectory,
-    destination,
-    inputFile.relativePath,
-    basename(inputFile.filename, ".proto")
-  );
-
+  const outDirectory = getClientOutputDirectory(destination, inputFile);
   const plugin = join(rootDirectory, "node_modules", ".bin", "protoc-gen-ts");
   const executable = join(
     rootDirectory,
@@ -97,30 +104,49 @@ const generateForFile = async ({
   );
 
   await mkdirp(outDirectory);
-  try {
-    console.log(`Generating code for ${inputFile.path}`);
-    const protocProcess = execa(
-      executable,
-      [
-        `--plugin=protoc-gen-ts=${plugin}`,
-        `--js_out=import_style=commonjs,binary:./`,
-        `--ts_out=service=grpc-node,mode=grpc-js:./`,
-        `--grpc_out=grpc_js:./`,
-        `--proto_path=${resolve(inputFile.path, "..")}`,
-        inputFile.filename,
-      ],
-      {
-        cwd: outDirectory,
-      }
-    );
+  const protocProcess = execa(
+    executable,
+    [
+      `--plugin=protoc-gen-ts=${plugin}`,
+      `--js_out=import_style=commonjs,binary:./`,
+      `--ts_out=service=grpc-node,mode=grpc-js:./`,
+      `--grpc_out=grpc_js:./`,
+      `--proto_path=${resolve(inputFile.path, "..")}`,
+      inputFile.filename,
+    ],
+    {
+      cwd: outDirectory,
+    }
+  );
 
-    protocProcess.stdout?.pipe(process.stdout);
-    protocProcess.stderr?.pipe(process.stderr);
-    await protocProcess;
-    console.log(`Successfully generated code for ${inputFile.path}`);
-  } catch (error) {
-    console.error(`Error generating for file ${inputFile.path}`);
+  protocProcess.stdout?.pipe(process.stdout);
+  protocProcess.stderr?.pipe(process.stderr);
+  await protocProcess;
+};
+
+const generateClient = async ({
+  inputFile,
+  destination,
+}: {
+  inputFile: InputFile;
+  destination: string;
+}) => {
+  const grpcPbDefintionsFile = join(
+    getClientOutputDirectory(destination, inputFile),
+    `${basename(inputFile.filename, ".proto")}_grpc_pb.d.ts`
+  );
+
+  const output = await generateClientDeclarationAndJavaScript(
+    grpcPbDefintionsFile
+  );
+
+  if (!output) {
+    throw new Error("Error occurred generating client");
   }
+
+  const outputDirectory = getClientOutputDirectory(destination, inputFile);
+  await writeFile(join(outputDirectory, "index.d.ts"), output.declaration);
+  await writeFile(join(outputDirectory, "index.js"), output.javascript);
 };
 
 const onGenerate = async ({
@@ -131,8 +157,14 @@ const onGenerate = async ({
   const inputFiles = await getInputFiles({ input, recursive });
   const rootDirectory = await getRootDirectory();
   await Promise.all(
-    inputFiles.map((inputFile) => {
-      return generateForFile({ inputFile, destination, rootDirectory });
+    inputFiles.map(async (inputFile) => {
+      try {
+        await generateForFile({ inputFile, destination, rootDirectory });
+        await generateClient({ inputFile, destination });
+        console.log(`Successfully generated output for: ${inputFile.path}`);
+      } catch (error) {
+        console.log(`Failed to generate output for: ${inputFile.path}`);
+      }
     })
   );
 };

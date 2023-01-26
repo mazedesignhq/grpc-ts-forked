@@ -1,13 +1,8 @@
 import * as grpc from "@grpc/grpc-js";
 import { Empty } from "google-protobuf/google/protobuf/empty_pb";
 import execa from "execa";
-import { createClient, GenericClient } from "../../src";
-import {
-  OnData,
-  ReadWriteStreamReturnType,
-  WriteStream,
-} from "../../src/types";
-import { UsersClient } from "../generated/users/users_grpc_pb";
+import { OnData } from "@lewnelson/grpc-ts";
+import { UsersClient } from "../generated/users";
 import {
   CreateUserRequest,
   EmitUserActionRequest,
@@ -118,19 +113,16 @@ const startServers = (): [
 
 describe("Users service", () => {
   let serverProcesses: { valid: ServerProcess; invalid: ServerProcess };
-  let validClient: GenericClient<UsersClient>;
-  let invalidClient: GenericClient<UsersClient>;
+  let validClient: UsersClient;
+  let invalidClient: UsersClient;
   beforeAll(async () => {
     const [processes, serversReady] = startServers();
     serverProcesses = processes;
 
     await serversReady;
 
-    validClient = createClient(UsersClient, `localhost:${VALID_SERVER_PORT}`);
-    invalidClient = createClient(
-      UsersClient,
-      `localhost:${INVALID_SERVER_PORT}`
-    );
+    validClient = new UsersClient(`localhost:${VALID_SERVER_PORT}`);
+    invalidClient = new UsersClient(`localhost:${INVALID_SERVER_PORT}`);
   });
 
   afterAll(() => {
@@ -145,7 +137,7 @@ describe("Users service", () => {
         const request = new GetUserByIdRequest();
         request.setId("user-1");
 
-        const response = await validClient.unaryRequest("getUserById", request);
+        const response = await validClient.getUserById(request);
         expect(response.toObject()).toEqual({
           user: {
             id: "user-1",
@@ -158,7 +150,7 @@ describe("Users service", () => {
 
       it("should throw an error when the request fails", async () => {
         await expect(
-          invalidClient.unaryRequest("getUserById", new GetUserByIdRequest())
+          invalidClient.getUserById(new GetUserByIdRequest())
         ).rejects.toThrowGrpcException("User not found", grpc.status.NOT_FOUND);
       });
     });
@@ -173,7 +165,7 @@ describe("Users service", () => {
 
         request.setUser(user);
 
-        const response = await validClient.unaryRequest("createUser", request);
+        const response = await validClient.createUser(request);
         expect(response.toObject()).toEqual({
           user: {
             id: "user-2",
@@ -186,7 +178,7 @@ describe("Users service", () => {
 
       it("should throw an error when the request fails", async () => {
         await expect(
-          invalidClient.unaryRequest("createUser", new CreateUserRequest())
+          invalidClient.createUser(new CreateUserRequest())
         ).rejects.toThrowGrpcException(
           "User with email already exists",
           grpc.status.ALREADY_EXISTS
@@ -199,11 +191,7 @@ describe("Users service", () => {
         const request = new GetUsersByTeamIdRequest();
         request.setTeamId("team-1");
 
-        const response = await validClient.unaryRequest(
-          "getUsersByTeamId",
-          request
-        );
-
+        const response = await validClient.getUsersByTeamId(request);
         expect(response.toObject()).toEqual({
           usersList: [
             {
@@ -224,10 +212,7 @@ describe("Users service", () => {
 
       it("should throw an error when the request fails", async () => {
         await expect(
-          invalidClient.unaryRequest(
-            "getUsersByTeamId",
-            new GetUsersByTeamIdRequest()
-          )
+          invalidClient.getUsersByTeamId(new GetUsersByTeamIdRequest())
         ).rejects.toThrowGrpcException(
           "Invalid team id",
           grpc.status.INVALID_ARGUMENT
@@ -246,7 +231,7 @@ describe("Users service", () => {
 
         beforeAll(async () => {
           const request = new Empty();
-          validClient.serverStreamRequest("userCreated", request, {
+          validClient.userCreated(request, {
             onData,
           });
 
@@ -338,7 +323,7 @@ describe("Users service", () => {
 
         beforeAll(async () => {
           const request = new Empty();
-          invalidClient.serverStreamRequest("userCreated", request, {
+          invalidClient.userCreated(request, {
             onData,
           });
 
@@ -406,7 +391,7 @@ describe("Users service", () => {
 
   describe("client streaming", () => {
     describe("EmitUserAction", () => {
-      let stream: WriteStream<UsersClient, "emitUserAction">;
+      let stream: ReturnType<UsersClient["emitUserAction"]>;
       let response: EmitUserActionResponse | undefined;
       let error: grpc.ServiceError | null;
       let onResponse: jest.Mock<
@@ -421,10 +406,7 @@ describe("Users service", () => {
         describe("no requests", () => {
           beforeAll(async () => {
             onResponse = jest.fn();
-            stream = await validClient.clientStreamRequest(
-              "emitUserAction",
-              onResponse
-            );
+            stream = await validClient.emitUserAction(onResponse);
 
             const serverOutputPromise = waitForServerStdOut(
               serverProcesses.valid,
@@ -454,11 +436,7 @@ describe("Users service", () => {
         describe("multiple requests", () => {
           beforeAll(async () => {
             onResponse = jest.fn();
-            stream = await validClient.clientStreamRequest(
-              "emitUserAction",
-              onResponse
-            );
-
+            stream = await validClient.emitUserAction(onResponse);
             const requestOne = new EmitUserActionRequest();
             requestOne.setUserId("user-1");
             requestOne.setAction(UserAction.USER_ACTION_DOWNLOADED);
@@ -513,11 +491,7 @@ describe("Users service", () => {
       describe("failed requests", () => {
         beforeAll(async () => {
           onResponse = jest.fn();
-          stream = await invalidClient.clientStreamRequest(
-            "emitUserAction",
-            onResponse
-          );
-
+          stream = await invalidClient.emitUserAction(onResponse);
           const serverOutputPromise = waitForServerStdOut(
             serverProcesses.invalid,
             "EmitUserAction stream ended",
@@ -547,7 +521,7 @@ describe("Users service", () => {
 
   describe("duplex streaming", () => {
     describe("UserUpdated", () => {
-      let stream: ReadWriteStreamReturnType<UsersClient, "updateUser">;
+      let stream: ReturnType<UsersClient["updateUser"]>;
       let onData: jest.Mock<
         ReturnType<OnData<UserUpdatedResponse>>,
         Parameters<OnData<UserUpdatedResponse>>
@@ -557,7 +531,7 @@ describe("Users service", () => {
         describe("when no requests are sent and the client closes the stream", () => {
           beforeAll(async () => {
             onData = jest.fn();
-            stream = validClient.duplexStreamRequest("updateUser", { onData });
+            stream = validClient.updateUser({ onData });
             stream.end();
             await waitForServerStdOut(
               serverProcesses.valid,
@@ -575,7 +549,7 @@ describe("Users service", () => {
         describe("when the client sends multiple requests, then closes the stream", () => {
           beforeAll(async () => {
             onData = jest.fn();
-            stream = validClient.duplexStreamRequest("updateUser", { onData });
+            stream = validClient.updateUser({ onData });
 
             const requestOne = new UpdateUserRequest();
             requestOne.setUserId("user-1");
@@ -632,7 +606,7 @@ describe("Users service", () => {
       describe("when the server emits an error", () => {
         beforeAll(async () => {
           onData = jest.fn();
-          stream = invalidClient.duplexStreamRequest("updateUser", { onData });
+          stream = invalidClient.updateUser({ onData });
           const serverStdOutPromise = waitForServerStdOut(
             serverProcesses.invalid,
             "UpdateUser stream ended",

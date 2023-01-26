@@ -65,7 +65,7 @@ describe("'grpc-ts generate' cli command", () => {
   let filesystemTree: FilesystemTree;
   describe("when specifying a directory", () => {
     beforeAll(async () => {
-      await runCommand("./protos", "./generated", true);
+      await runCommand("../protos", "./generated", true);
       filesystemTree = getFilesystemTree(generatedDirectory);
     });
 
@@ -96,6 +96,14 @@ describe("'grpc-ts generate' cli command", () => {
                     "name": "events_pb.js",
                     "type": "file",
                   },
+                  {
+                    "name": "index.d.ts",
+                    "type": "file",
+                  },
+                  {
+                    "name": "index.js",
+                    "type": "file",
+                  },
                 ],
                 "name": "events",
                 "type": "directory",
@@ -104,6 +112,14 @@ describe("'grpc-ts generate' cli command", () => {
                 "children": [
                   {
                     "children": [
+                      {
+                        "name": "index.d.ts",
+                        "type": "file",
+                      },
+                      {
+                        "name": "index.js",
+                        "type": "file",
+                      },
                       {
                         "name": "monitoring_grpc_pb.d.ts",
                         "type": "file",
@@ -130,6 +146,14 @@ describe("'grpc-ts generate' cli command", () => {
               },
               {
                 "children": [
+                  {
+                    "name": "index.d.ts",
+                    "type": "file",
+                  },
+                  {
+                    "name": "index.js",
+                    "type": "file",
+                  },
                   {
                     "name": "users_grpc_pb.d.ts",
                     "type": "file",
@@ -172,12 +196,28 @@ describe("'grpc-ts generate' cli command", () => {
                 "name": "events_pb.js",
                 "type": "file",
               },
+              {
+                "name": "index.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "index.js",
+                "type": "file",
+              },
             ],
             "name": "events",
             "type": "directory",
           },
           {
             "children": [
+              {
+                "name": "index.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "index.js",
+                "type": "file",
+              },
               {
                 "name": "logger_grpc_pb.d.ts",
                 "type": "file",
@@ -201,6 +241,14 @@ describe("'grpc-ts generate' cli command", () => {
           {
             "children": [
               {
+                "name": "index.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "index.js",
+                "type": "file",
+              },
+              {
                 "name": "people_grpc_pb.d.ts",
                 "type": "file",
               },
@@ -220,6 +268,36 @@ describe("'grpc-ts generate' cli command", () => {
             "name": "people",
             "type": "directory",
           },
+          {
+            "children": [
+              {
+                "name": "index.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "index.js",
+                "type": "file",
+              },
+              {
+                "name": "users_grpc_pb.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "users_grpc_pb.js",
+                "type": "file",
+              },
+              {
+                "name": "users_pb.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "users_pb.js",
+                "type": "file",
+              },
+            ],
+            "name": "users",
+            "type": "directory",
+          },
         ]
       `);
     });
@@ -227,7 +305,7 @@ describe("'grpc-ts generate' cli command", () => {
 
   describe("when specifying a directory and setting recursive to false", () => {
     beforeAll(async () => {
-      await runCommand("./protos", "./generated", false);
+      await runCommand("../protos", "./generated", false);
       filesystemTree = getFilesystemTree(generatedDirectory);
     });
 
@@ -256,12 +334,28 @@ describe("'grpc-ts generate' cli command", () => {
                 "name": "events_pb.js",
                 "type": "file",
               },
+              {
+                "name": "index.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "index.js",
+                "type": "file",
+              },
             ],
             "name": "events",
             "type": "directory",
           },
           {
             "children": [
+              {
+                "name": "index.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "index.js",
+                "type": "file",
+              },
               {
                 "name": "logger_grpc_pb.d.ts",
                 "type": "file",
@@ -285,6 +379,14 @@ describe("'grpc-ts generate' cli command", () => {
           {
             "children": [
               {
+                "name": "index.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "index.js",
+                "type": "file",
+              },
+              {
                 "name": "people_grpc_pb.d.ts",
                 "type": "file",
               },
@@ -304,6 +406,36 @@ describe("'grpc-ts generate' cli command", () => {
             "name": "people",
             "type": "directory",
           },
+          {
+            "children": [
+              {
+                "name": "index.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "index.js",
+                "type": "file",
+              },
+              {
+                "name": "users_grpc_pb.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "users_grpc_pb.js",
+                "type": "file",
+              },
+              {
+                "name": "users_pb.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "users_pb.js",
+                "type": "file",
+              },
+            ],
+            "name": "users",
+            "type": "directory",
+          },
         ]
       `);
     });
@@ -311,7 +443,7 @@ describe("'grpc-ts generate' cli command", () => {
 
   describe("when specifying a single file in ./protos/events.proto", () => {
     beforeAll(async () => {
-      await runCommand("./protos/events.proto", "./generated");
+      await runCommand("../protos/events.proto", "./generated");
       filesystemTree = getFilesystemTree(generatedDirectory);
     });
 
@@ -340,6 +472,14 @@ describe("'grpc-ts generate' cli command", () => {
                 "name": "events_pb.js",
                 "type": "file",
               },
+              {
+                "name": "index.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "index.js",
+                "type": "file",
+              },
             ],
             "name": "events",
             "type": "directory",
@@ -352,7 +492,7 @@ describe("'grpc-ts generate' cli command", () => {
   describe("when specifying a single file in ./protos/accounts/infra/monitoring.proto", () => {
     beforeAll(async () => {
       await runCommand(
-        "./protos/accounts/infra/monitoring.proto",
+        "../protos/accounts/infra/monitoring.proto",
         "./generated"
       );
       filesystemTree = getFilesystemTree(generatedDirectory);
@@ -367,6 +507,14 @@ describe("'grpc-ts generate' cli command", () => {
         [
           {
             "children": [
+              {
+                "name": "index.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "index.js",
+                "type": "file",
+              },
               {
                 "name": "monitoring_grpc_pb.d.ts",
                 "type": "file",
@@ -395,7 +543,7 @@ describe("'grpc-ts generate' cli command", () => {
   describe("generating the output in a nested subdirectory", () => {
     beforeAll(async () => {
       await runCommand(
-        "./protos/accounts/infra/monitoring.proto",
+        "../protos/accounts/infra/monitoring.proto",
         "./generated/subdirectory/generated"
       );
       filesystemTree = getFilesystemTree(
@@ -412,6 +560,14 @@ describe("'grpc-ts generate' cli command", () => {
         [
           {
             "children": [
+              {
+                "name": "index.d.ts",
+                "type": "file",
+              },
+              {
+                "name": "index.js",
+                "type": "file",
+              },
               {
                 "name": "monitoring_grpc_pb.d.ts",
                 "type": "file",

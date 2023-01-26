@@ -6,6 +6,8 @@ import * as path from "path";
 const generatedDirectory = path.join(__dirname, "generated");
 const cliPath = path.join("..", "..", "cli", "index.js");
 
+const COMMAND_TIMEOUT = 15e3;
+
 const runCommand = async (
   input: string,
   destination: string,
@@ -67,7 +69,7 @@ describe("'grpc-ts generate' cli command", () => {
     beforeAll(async () => {
       await runCommand("../protos", "./generated", true);
       filesystemTree = getFilesystemTree(generatedDirectory);
-    });
+    }, COMMAND_TIMEOUT);
 
     afterAll(async () => {
       await cleanup();
@@ -307,7 +309,7 @@ describe("'grpc-ts generate' cli command", () => {
     beforeAll(async () => {
       await runCommand("../protos", "./generated", false);
       filesystemTree = getFilesystemTree(generatedDirectory);
-    });
+    }, COMMAND_TIMEOUT);
 
     afterAll(async () => {
       await cleanup();
@@ -445,7 +447,7 @@ describe("'grpc-ts generate' cli command", () => {
     beforeAll(async () => {
       await runCommand("../protos/events.proto", "./generated");
       filesystemTree = getFilesystemTree(generatedDirectory);
-    });
+    }, COMMAND_TIMEOUT);
 
     afterAll(async () => {
       await cleanup();
@@ -496,7 +498,7 @@ describe("'grpc-ts generate' cli command", () => {
         "./generated"
       );
       filesystemTree = getFilesystemTree(generatedDirectory);
-    });
+    }, COMMAND_TIMEOUT);
 
     afterAll(async () => {
       await cleanup();
@@ -549,7 +551,7 @@ describe("'grpc-ts generate' cli command", () => {
       filesystemTree = getFilesystemTree(
         path.join(generatedDirectory, "subdirectory", "generated")
       );
-    });
+    }, COMMAND_TIMEOUT);
 
     afterAll(async () => {
       await cleanup();

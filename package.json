@@ -34,7 +34,7 @@
     "clean": "npm run clean:cli && npm run clean:dist",
     "clean:cli": "rimraf cli",
     "clean:dist": "rimraf dist",
-    "generate:test": "rimraf test/generated && node ./cli/index.js generate test/protos test/generated",
+    "generate:test": "rimraf test/generated && node ./cli/index.js generate test/protos/users.proto test/generated",
     "lint": "eslint .",
     "lint:fix": "npm run lint --fix",
     "prepare": "npx install-peers && npx husky install",

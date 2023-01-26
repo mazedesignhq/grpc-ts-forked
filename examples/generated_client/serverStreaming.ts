@@ -1,13 +1,12 @@
 import { Metadata } from "@grpc/grpc-js";
-import { createClient } from "@lewnelson/grpc-ts";
-import { ExampleClient } from "./generated/example/example_grpc_pb";
+import { ExampleClient } from "../generated/example";
 import {
   StreamMessagesRequest,
   StreamMessagesResponse,
-} from "./generated/example/example_pb";
+} from "../generated/example/example_pb";
 
 // Creates client with insecure credentials
-const client = createClient(ExampleClient, "localhost:50051");
+const client = new ExampleClient("localhost:50051");
 
 // Making a basic request
 (() => {
@@ -16,7 +15,7 @@ const client = createClient(ExampleClient, "localhost:50051");
   request.setId("id");
 
   // Make the request
-  client.serverStreamRequest("streamMessages", request, {
+  client.streamMessages(request, {
     onData: (
       complete: boolean,
       error: Error | null,
@@ -48,7 +47,7 @@ const client = createClient(ExampleClient, "localhost:50051");
   request.setId("id");
 
   // Make the request specifying metadata and call options
-  const stream = client.serverStreamRequest("streamMessages", request, {
+  const stream = client.streamMessages(request, {
     metadata: new Metadata({ cacheableRequest: true }),
     options: { deadline: new Date(Date.now() + 10e3) },
   });

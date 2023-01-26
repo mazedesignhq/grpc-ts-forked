@@ -263,10 +263,20 @@ export type WriteStreamOnResponse<
   response: WriteableStreamResponseType<TGrpcClient, TFn>
 ) => void;
 
+export type UnaryRequestReturnType<
+  TGrpcClient,
+  TFn extends keyof UnaryGrpcFunctions<TGrpcClient>
+> = Promise<NonNullable<UnaryResponseType<TGrpcClient, TFn>>>;
+
 export type WriteStreamReturnType<
   TGrpcClient,
   TFn extends keyof WriteableStreamFunctions<TGrpcClient>
 > = WriteStream<TGrpcClient, TFn>;
+
+export type ReadStreamReturnType<
+  TGrpcClient,
+  TFn extends keyof ReadableStreamFunctions<TGrpcClient>
+> = grpc.ClientReadableStream<ReadableStreamResponseType<TGrpcClient, TFn>>;
 
 export type ReadWriteStreamReturnType<
   TGrpcClient,
@@ -283,3 +293,35 @@ export type ReadWriteStreamReturnType<
 export type WriteAsyncCallback<TRequestType> = (
   chunk: TRequestType
 ) => Promise<void>;
+
+// Generated client types
+export type UnaryRequest<
+  TGrpcClient,
+  TFn extends keyof UnaryGrpcFunctions<TGrpcClient>
+> = (
+  requestType: UnaryRequestType<TGrpcClient, TFn>,
+  callOptions?: GrpcCall
+) => UnaryRequestReturnType<TGrpcClient, TFn>;
+
+export type ReadableStreamRequest<
+  TGrpcClient,
+  TFn extends keyof ReadableStreamFunctions<TGrpcClient>
+> = (
+  requestType: ReadableStreamRequestType<TGrpcClient, TFn>,
+  callOptions?: GrpcReadStreamCall<TGrpcClient, TFn>
+) => ReadStreamReturnType<TGrpcClient, TFn>;
+
+export type WriteableStreamRequest<
+  TGrpcClient,
+  TFn extends keyof WriteableStreamFunctions<TGrpcClient>
+> = (
+  onResponse: WriteStreamOnResponse<TGrpcClient, TFn>,
+  callOptions?: GrpcCall
+) => WriteStreamReturnType<TGrpcClient, TFn>;
+
+export type DuplexStreamRequest<
+  TGrpcClient,
+  TFn extends keyof DuplexStreamFunctions<TGrpcClient>
+> = (
+  callOptions?: GrpcReadWriteStreamCall<TGrpcClient, TFn>
+) => ReadWriteStreamReturnType<TGrpcClient, TFn>;

@@ -1,13 +1,12 @@
-import { createClient } from "@lewnelson/grpc-ts";
-import { ExampleClient } from "./generated/example/example_grpc_pb";
-import { ChatRequest, ChatResponse } from "./generated/example/example_pb";
+import { ExampleClient } from "../generated/example";
+import { ChatRequest, ChatResponse } from "../generated/example/example_pb";
 
 // Creates client with insecure credentials
-const client = createClient(ExampleClient, "localhost:50051");
+const client = new ExampleClient("localhost:50051");
 
 // Basic implementation
 (async () => {
-  const stream = client.duplexStreamRequest("chat", {
+  const stream = client.chat({
     onData: (
       complete: boolean,
       error: Error | null,
@@ -48,7 +47,7 @@ const client = createClient(ExampleClient, "localhost:50051");
 // Advanced usage
 (async () => {
   // Create the stream without binding a callback
-  const stream = client.duplexStreamRequest("chat");
+  const stream = client.chat();
 
   // Access the underlying grpc-js Duplex stream
   stream._stream.on("data", (chunk: unknown) => {

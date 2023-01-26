@@ -9,7 +9,6 @@ import {
   UnaryGrpcFunction,
   ReadableStreamFunctions,
   ReadableStreamRequestType,
-  ReadableStreamResponseType,
   ReadableStreamGrpcFunction,
   WriteableStreamFunctions,
   WriteableStreamGrpcFunction,
@@ -22,6 +21,7 @@ import {
   OnData,
   WriteAsyncCallback,
   WriteStreamOnResponse,
+  ReadStreamReturnType,
 } from "./types";
 
 /**
@@ -126,7 +126,7 @@ export class GenericClient<TGrpcClient extends grpc.Client> {
     fn: TFn,
     request: ReadableStreamRequestType<TGrpcClient, TFn>,
     callOptions: GrpcReadStreamCall<TGrpcClient, TFn> = {}
-  ): grpc.ClientReadableStream<ReadableStreamResponseType<TGrpcClient, TFn>> {
+  ): ReadStreamReturnType<TGrpcClient, TFn> {
     const { metadata, options, onData } = callOptions;
     const stream = (
       this.client[fn] as ReadableStreamGrpcFunction<TGrpcClient, TFn>

@@ -1,18 +1,16 @@
 import { credentials, Metadata, ServiceError } from "@grpc/grpc-js";
-import { createClient } from "@lewnelson/grpc-ts";
-import { ExampleClient } from "./generated/example/example_grpc_pb";
+import { ExampleClient } from "../generated/example";
 import {
   EmitMessagesRequest,
   EmitMessagesResponse,
-} from "./generated/example/example_pb";
+} from "../generated/example/example_pb";
 
 // Creates client with insecure credentials
-const client = createClient(ExampleClient, "localhost:50051");
+const client = new ExampleClient("localhost:50051");
 
 // Making a basic request
 (async () => {
-  const stream = client.clientStreamRequest(
-    "emitMessages",
+  const stream = client.emitMessages(
     (error: ServiceError | null, response?: EmitMessagesResponse) => {
       if (error) {
         // Server responded with an error
@@ -39,8 +37,7 @@ const client = createClient(ExampleClient, "localhost:50051");
 
 // Advanced usage
 (async () => {
-  const stream = client.clientStreamRequest(
-    "emitMessages",
+  const stream = client.emitMessages(
     (error: ServiceError | null, response?: EmitMessagesResponse) => {
       if (error) {
         // Server responded with an error

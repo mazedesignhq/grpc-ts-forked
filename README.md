@@ -18,8 +18,10 @@ const response = await client.getName(new GetNameRequest());
 
 ## Install
 
+Ensure you also install `@grpc/grpc-js` as a peer dependency.
+
 ```bash
-npm install @lewnelson/grpc-ts
+npm install @lewnelson/grpc-ts @grpc/grpc-js@^1.8.4
 ```
 
 ## Usage

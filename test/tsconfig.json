@@ -1,9 +1,0 @@
-{
-  "extends": "../tsconfig.json",
-  "include": ["**/*.ts"],
-  "compilerOptions": {
-    "paths": {
-      "@lewnelson/grpc-ts": ["../src/index.ts"]
-    }
-  }
-}
